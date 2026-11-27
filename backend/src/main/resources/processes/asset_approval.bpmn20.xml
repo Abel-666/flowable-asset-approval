@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             targetNamespace="http://www.flowable.org/processdef">
+
+  <process id="asset_approval_process" name="固定资产审批流程" isExecutable="true">
+    <startEvent id="startEvent" name="发起申请"/>
+    <sequenceFlow id="flow1" sourceRef="startEvent" targetRef="dept_approve"/>
+
+    <!-- 第一级：部门主管审批 -->
+    <userTask id="dept_approve" name="部门主管审批" flowable:candidateGroups="DEPT_MANAGER"/>
+    <sequenceFlow id="flow2" sourceRef="dept_approve" targetRef="amount_gateway"/>
+
+    <!-- 条件分支（排他网关）：金额 >= 5000 元需要财务主管加签审批 -->
+    <exclusiveGateway id="amount_gateway" name="金额判断(&gt;=5000元)" default="flow_low"/>
+
+    <sequenceFlow id="flow_high" name="金额 &gt;= 5000" sourceRef="amount_gateway" targetRef="finance_approve">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${amount >= 5000}]]></conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="flow_low" name="金额 &lt; 5000" sourceRef="amount_gateway" targetRef="admin_confirm"/>
+
+    <!-- 第二级（大额分支）：财务主管审批 -->
+    <userTask id="finance_approve" name="财务主管审批" flowable:candidateGroups="FINANCE_MANAGER"/>
+    <sequenceFlow id="flow3" sourceRef="finance_approve" targetRef="admin_confirm"/>
+
+    <!-- 最后一级：资产管理员确认入库/出库/报废 -->
+    <userTask id="admin_confirm" name="资产管理员确认" flowable:candidateGroups="ASSET_ADMIN"/>
+    <sequenceFlow id="flow4" sourceRef="admin_confirm" targetRef="endEvent"/>
+
+    <endEvent id="endEvent" name="流程结束"/>
+  </process>
+
+  <!-- 流程图坐标信息，供前端 bpmn-js 直接渲染显示 -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_asset_approval_process">
+    <bpmndi:BPMNPlane id="BPMNPlane_asset_approval_process" bpmnElement="asset_approval_process">
+      <bpmndi:BPMNShape id="shape_start" bpmnElement="startEvent">
+        <omgdc:Bounds x="80" y="160" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_dept" bpmnElement="dept_approve">
+        <omgdc:Bounds x="180" y="138" width="110" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_gateway" bpmnElement="amount_gateway" isMarkerVisible="true">
+        <omgdc:Bounds x="355" y="153" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_finance" bpmnElement="finance_approve">
+        <omgdc:Bounds x="470" y="50" width="110" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_admin" bpmnElement="admin_confirm">
+        <omgdc:Bounds x="630" y="138" width="110" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_end" bpmnElement="endEvent">
+        <omgdc:Bounds x="800" y="160" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="edge_flow1" bpmnElement="flow1">
+        <omgdi:waypoint x="116" y="178"/>
+        <omgdi:waypoint x="180" y="178"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge_flow2" bpmnElement="flow2">
+        <omgdi:waypoint x="290" y="178"/>
+        <omgdi:waypoint x="355" y="178"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge_flow_high" bpmnElement="flow_high">
+        <omgdi:waypoint x="380" y="153"/>
+        <omgdi:waypoint x="380" y="90"/>
+        <omgdi:waypoint x="470" y="90"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge_flow_low" bpmnElement="flow_low">
+        <omgdi:waypoint x="405" y="178"/>
+        <omgdi:waypoint x="630" y="178"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge_flow3" bpmnElement="flow3">
+        <omgdi:waypoint x="580" y="90"/>
+        <omgdi:waypoint x="685" y="90"/>
+        <omgdi:waypoint x="685" y="138"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge_flow4" bpmnElement="flow4">
+        <omgdi:waypoint x="740" y="178"/>
+        <omgdi:waypoint x="800" y="178"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

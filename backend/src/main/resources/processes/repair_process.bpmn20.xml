@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             targetNamespace="http://www.flowable.org/processdef">
+
+  <process id="repair_process" name="设备报修审批流程" isExecutable="true">
+    <startEvent id="startEvent" name="员工发起报修"/>
+    <sequenceFlow id="flow1" sourceRef="startEvent" targetRef="admin_approve"/>
+    <userTask id="admin_approve" name="资产管理员审核报修" flowable:candidateGroups="ASSET_ADMIN"/>
+    <sequenceFlow id="flow2" sourceRef="admin_approve" targetRef="endEvent"/>
+    <endEvent id="endEvent" name="进入维修中"/>
+  </process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_repair_process">
+    <bpmndi:BPMNPlane id="BPMNPlane_repair_process" bpmnElement="repair_process">
+      <bpmndi:BPMNShape id="r_start" bpmnElement="startEvent">
+        <omgdc:Bounds x="100" y="140" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="r_admin" bpmnElement="admin_approve">
+        <omgdc:Bounds x="230" y="118" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="r_end" bpmnElement="endEvent">
+        <omgdc:Bounds x="460" y="140" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="r_e1" bpmnElement="flow1">
+        <omgdi:waypoint x="136" y="158"/>
+        <omgdi:waypoint x="230" y="158"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="r_e2" bpmnElement="flow2">
+        <omgdi:waypoint x="370" y="158"/>
+        <omgdi:waypoint x="460" y="158"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             targetNamespace="http://www.flowable.org/processdef">
+
+  <process id="peer_borrow_process" name="在用设备借用审批流程" isExecutable="true">
+    <startEvent id="startEvent" name="发起借用申请"/>
+    <sequenceFlow id="flow1" sourceRef="startEvent" targetRef="holder_approve"/>
+
+    <!-- 第一级：设备当前占有人本人同意 -->
+    <userTask id="holder_approve" name="当前使用人同意" flowable:assignee="${holderId}"/>
+    <sequenceFlow id="flow2" sourceRef="holder_approve" targetRef="amount_gateway"/>
+
+    <!-- 金额判断：> 1000 元需要上级主管审批 -->
+    <exclusiveGateway id="amount_gateway" name="金额判断(&gt;1000元)" default="flow_low"/>
+    <sequenceFlow id="flow_high" name="金额 &gt; 1000" sourceRef="amount_gateway" targetRef="dept_approve">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${amount > 1000}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_low" name="金额 &lt;= 1000" sourceRef="amount_gateway" targetRef="endEvent"/>
+
+    <!-- 第二级：部门主管审批 -->
+    <userTask id="dept_approve" name="部门主管审批" flowable:candidateGroups="DEPT_MANAGER"/>
+    <sequenceFlow id="flow3" sourceRef="dept_approve" targetRef="endEvent"/>
+
+    <endEvent id="endEvent" name="借用完成"/>
+  </process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_peer_borrow_process">
+    <bpmndi:BPMNPlane id="BPMNPlane_peer_borrow_process" bpmnElement="peer_borrow_process">
+      <bpmndi:BPMNShape id="p_start" bpmnElement="startEvent">
+        <omgdc:Bounds x="80" y="150" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="p_holder" bpmnElement="holder_approve">
+        <omgdc:Bounds x="180" y="128" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="p_gw" bpmnElement="amount_gateway" isMarkerVisible="true">
+        <omgdc:Bounds x="365" y="143" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="p_dept" bpmnElement="dept_approve">
+        <omgdc:Bounds x="480" y="50" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="p_end" bpmnElement="endEvent">
+        <omgdc:Bounds x="660" y="150" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="p_e1" bpmnElement="flow1">
+        <omgdi:waypoint x="116" y="168"/>
+        <omgdi:waypoint x="180" y="168"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="p_e2" bpmnElement="flow2">
+        <omgdi:waypoint x="300" y="168"/>
+        <omgdi:waypoint x="365" y="168"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="p_ehigh" bpmnElement="flow_high">
+        <omgdi:waypoint x="390" y="143"/>
+        <omgdi:waypoint x="390" y="90"/>
+        <omgdi:waypoint x="480" y="90"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="p_elow" bpmnElement="flow_low">
+        <omgdi:waypoint x="415" y="168"/>
+        <omgdi:waypoint x="660" y="168"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="p_e3" bpmnElement="flow3">
+        <omgdi:waypoint x="600" y="90"/>
+        <omgdi:waypoint x="678" y="90"/>
+        <omgdi:waypoint x="678" y="150"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
